@@ -158,3 +158,79 @@ provideApolloClients({
   clientA: apolloClientA,
 })
 ```
+
+## WebSocket Setup for Subscriptions
+
+Subscriptions require a WebSocket link in addition to HTTP. Apollo Client supports two protocols:
+- **graphql-ws** (recommended, actively maintained)
+- **subscriptions-transport-ws** (legacy, deprecated)
+
+### graphql-ws (Recommended)
+
+```bash
+npm install graphql-ws
+```
+
+```typescript
+import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client/core'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
+import { getMainDefinition } from '@apollo/client/utilities'
+
+// HTTP link for queries and mutations
+const httpLink = new HttpLink({
+  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:4000/graphql',
+})
+
+// WebSocket link for subscriptions
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: import.meta.env.VITE_WS_URL || 'ws://localhost:4000/graphql',
+    // Auth over WebSocket (see below)
+    connectionParams: () => {
+      const token = localStorage.getItem('auth_token')
+      return token ? { authorization: `Bearer ${token}` } : {}
+    },
+  })
+)
+
+// Split links by operation type
+const link = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return (
+      definition.kind === 'OperationDefinition'
+      && definition.operation === 'subscription'
+    )
+  },
+  wsLink,
+  httpLink
+)
+
+export const apolloClient = new ApolloClient({
+  link,
+  cache: new InMemoryCache(),
+})
+```
+
+### subscriptions-transport-ws (Legacy)
+
+```bash
+npm install subscriptions-transport-ws
+```
+
+```typescript
+import { WebSocketLink } from '@apollo/client/link/ws'
+
+const wsLink = new WebSocketLink({
+  uri: 'ws://localhost:4000/graphql',
+  options: {
+    reconnect: true,
+    connectionParams: {
+      authToken: localStorage.getItem('auth_token'),
+    },
+  },
+})
+```
+
+> ⚠️ **Note:** `subscriptions-transport-ws` is no longer actively maintained. Use `graphql-ws` for new projects.

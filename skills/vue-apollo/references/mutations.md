@@ -209,4 +209,124 @@ const { mutate: createUser, onDone, loading } = useMutation(CreateUserDocument, 
 onDone(() => {
   // Reset form after successful creation
 })
+
+## Advanced Mutation Options
+
+### optimisticResponse — Instant UI Feedback
+
+```typescript
+const { mutate: deletePost } = useMutation(DELETE_POST, () => ({
+  optimisticResponse: {
+    __typename: 'Mutation',
+    deletePost: {
+      __typename: 'Post',
+      id: variables.postId,
+    },
+  },
+  update: (cache, { data }) => {
+    const deletedId = data?.deletePost.id
+    let cachedData = cache.readQuery({ query: PostsListDocument })
+    if (!cachedData) return
+
+    cache.writeQuery({
+      query: PostsListDocument,
+      data: {
+        posts: cachedData.posts.filter((p: Record<string, unknown>) => p.id !== deletedId),
+      },
+    })
+  },
+}))
+```
+
+### refetchQueries — Re-fetch Affected Queries
+
+Useful when mutation affects multiple queries:
+
+```typescript
+const { mutate: updateUser } = useMutation(UPDATE_USER, () => ({
+  variables: { id: userId.value, input: userData.value },
+  // Refetch these queries after mutation completes
+  refetchQueries: ['GetUserProfile', 'GetUserSettings'],
+}))
+```
+
+### awaitRefetchQueries — Wait for Queries to Complete
+
+By default, `refetchQueries` runs asynchronously. Set this to wait:
+
+```typescript
+const { mutate: updateUser } = useMutation(UPDATE_USER, () => ({
+  refetchQueries: ['GetUserProfile'],
+  awaitRefetchQueries: true, // Wait for query to complete before resolving mutation promise
+}))
+
+async function handleUpdate() {
+  await mutate({ id: userId.value, input: userData.value })
+  // At this point, GetUserProfile has already re-fetched
+}
+```
+
+### throws — Error Throwing Behavior
+
+Control when `mutate()` throws errors:
+
+```typescript
+const { mutate } = useMutation(MUTATION, () => ({
+  // 'auto' (default): throw only if no onError callback registered
+  // 'always': always throw on error
+  // 'never': never throw, handle via onError hook or error ref
+  throws: 'auto',
+}))
+```
+
+### updateQueries — Legacy Query Reducers (deprecated)
+
+`updateQueries` is deprecated in favor of `refetchQueries` and `cache.modify()`. Use the latter for new code.
+
+## Mutation Options Summary
+
+| Option | Type | Purpose |
+|--------|------|---------|
+| `optimisticResponse` | object | Instant UI before server response |
+| `refetchQueries` | string[] | Re-fetch queries by name after mutation |
+| `awaitRefetchQueries` | boolean | Wait for refetched queries to complete |
+| `update` | function | Manually update cache with mutation result |
+| `errorPolicy` | 'none' \| 'all' \| 'ignore' | How to handle GraphQL errors |
+| `fetchPolicy` | string | Cache behavior ('network-only', 'no-cache') |
+| `throws` | 'auto' \| 'always' \| 'never' | When mutate() should throw |
+
+## Complete Mutation Pattern with All Options
+
+```typescript
+const { mutate: createPost, loading, error } = useMutation(CREATE_POST, () => ({
+  variables: {
+    title: newTitle.value,
+    content: newContent.value,
+  },
+  optimisticResponse: {
+    __typename: 'Mutation',
+    createPost: {
+      __typename: 'Post',
+      id: `temp-${Date.now()}`,
+      title: newTitle.value,
+      content: newContent.value,
+      createdAt: new Date().toISOString(),
+    },
+  },
+  update: (cache, { data }) => {
+    const newPost = data?.createPost
+    if (!newPost) return
+
+    let cachedData = cache.readQuery({ query: PostsListDocument })
+    if (!cachedData) return
+
+    cache.writeQuery({
+      query: PostsListDocument,
+      data: { posts: [newPost, ...cachedData.posts] },
+    })
+  },
+  refetchQueries: ['GetFeed'],
+}))
+```
+
 ```

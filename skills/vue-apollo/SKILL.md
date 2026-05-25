@@ -1,6 +1,6 @@
 ---
 name: vue-apollo
-description: Guidelines for developing Vue 3 applications with GraphQL using @vue/apollo-composable (v4.x) and Apollo Client v3. Use when working with GraphQL queries, mutations, subscriptions, caching, pagination, or type-safe data fetching in Vue 3 + TypeScript projects. Covers useQuery, useMutation, useSubscription, useLazyQuery, cache management, error handling, and integration with GraphQL Codegen for full type safety.
+description: Guidelines for developing Vue 3 applications with GraphQL using @vue/apollo-composable (v4.x) and Apollo Client v3. Use when working with GraphQL queries, mutations, subscriptions, caching, pagination, WebSocket real-time updates, local state (@client), declarative components, or type-safe data fetching in Vue 3 + TypeScript projects.
 metadata:
   type: utility
   mode: generative
@@ -191,7 +191,9 @@ const { result } = useQuery(gql`query GetUser { user { id name } }`)
 
 ## When to Read References
 
-- **Setup & configuration** → [references/setup.md](references/setup.md) — Apollo Client, links, type policies
+- **Setup & configuration** → [references/setup.md](references/setup.md) — Apollo Client, HTTP/WebSocket links, type policies
 - **Queries & variables** → [references/queries.md](references/queries.md) — useQuery, useLazyQuery, polling, refetch
-- **Mutations & cache updates** → [references/mutations.md](references/mutations.md) — useMutation, optimistic UI, cache.modify
+- **Mutations & cache updates** → [references/mutations.md](references/mutations.md) — useMutation, optimistic UI, advanced options
 - **Subscriptions & pagination** → [references/subscriptions-pagination.md](references/subscriptions-pagination.md) — useSubscription, fetchMore
+- **Components API** → [references/components-api.md](references/components-api.md) — ApolloQuery, ApolloMutation declarative components
+- **Local state** → [references/local-state.md](references/local-state.md) — @client directive, local resolvers, extending remote types
