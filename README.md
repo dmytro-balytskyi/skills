@@ -8,7 +8,7 @@ Vue.js • GraphQL • Fastify • TypeScript
 
 | Skill | Description | Install |
 |-------|-------------|---------|
-| [vue-apollo](./vue-apollo/) | Vue 3 + GraphQL best practices with @vue/apollo-composable & Apollo Client v3 | `npx skills add dmytro-balytskyi/skills --skill vue-apollo` |
+| [vue-apollo](./skills/vue-apollo/) | Vue 3 + GraphQL best practices with @vue/apollo-composable & Apollo Client v3 | `npx skills add dmytro-balytskyi/skills --skill vue-apollo` |
 
 > **More skills coming soon!** Contributions welcome.
 
@@ -27,10 +27,8 @@ This is a monorepo containing multiple agent skills. Each skill lives in its own
 
 ```
 skills/
-├── LICENSE                      # MIT License
-├── README.md                    # This file
 ├── vue-apollo/                  # Vue 3 + GraphQL skill
-│   ├── SKILL.md                 # Core instructions (197 lines)
+│   ├── SKILL.md                 # Core instructions
 │   └── references/              # Detailed guides
 │       ├── setup.md             # Apollo Client configuration
 │       ├── queries.md           # useQuery, useLazyQuery patterns
